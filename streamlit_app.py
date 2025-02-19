@@ -3,6 +3,7 @@ import streamlit as st
 #from snowflake.snowpark.context import get_active_session
 from snowflake.snowpark.functions import col, when_matched
 import requests
+import pandas as pd
 
 # Write directly to the app
 st.title(":cup_with_straw: Customize Your Smoothie! :cup_with_straw:")
@@ -17,11 +18,14 @@ st.write('The name on your smoothie will be ', name_on_order)
 # Get the current credentials
 cnx = st.connection("snowflake")
 session = cnx.session()
-my_dataframe = session.table("smoothies.public.fruit_options").select(col('FRUIT_NAME'))
+my_dataframe = session.table("smoothies.public.fruit_options").select(col('SEARCH_ON'))
 #st.dataframe(data=my_dataframe, use_container_width=True)
 
-ingredients_list = st.multiselect('Choose upto 5 ingredients:',
-                                 my_dataframe, max_selections=5)
+pd_df = my_dataframe.to_pandas()
+st.dataframe(data=pd_df, use_container_width=True)
+st.stop()
+
+ingredients_list = st.multiselect('Choose upto 5 ingredients:', my_dataframe, max_selections=5)
 
 if ingredients_list:
     ingredients_string = ''
